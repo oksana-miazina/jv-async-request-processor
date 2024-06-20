@@ -8,7 +8,8 @@ public class Main {
     public static final int THREADS_COUNT = 5;
 
     public static void main(String[] args) {
-        try (ExecutorService executor = Executors.newFixedThreadPool(THREADS_COUNT)) {
+        ExecutorService executor = Executors.newFixedThreadPool(THREADS_COUNT);
+        try {
             AsyncRequestProcessor asyncRequestProcessor = new AsyncRequestProcessor(executor);
 
             String[] userIds = {"user1", "user2", "user3", "user1"};
@@ -21,6 +22,8 @@ public class Main {
             }
 
             CompletableFuture.allOf(futures).join();
+        } finally {
+            executor.shutdown();
         }
     }
 }

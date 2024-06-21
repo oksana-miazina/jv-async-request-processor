@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AsyncRequestProcessor {
     public static final String DETAILS_HEAD = "Details for ";
+    public static final int TIMEOUT_SIMULATION = 2000;
     private final Map<String, UserData> cache = new ConcurrentHashMap<>();
     private final Executor executor;
 
@@ -21,20 +22,22 @@ public class AsyncRequestProcessor {
     }
 
     private UserData getUserData(String userId) {
+        return cache.computeIfAbsent(userId, this::fetchUserDataById);
+    }
+
+    private UserData fetchUserDataById(String userId) {
+        // TODO: real user data fetching needs to be implemented
+        simulateApiRequest(userId);
+        return new UserData(userId, DETAILS_HEAD + userId);
+    }
+
+    private static void simulateApiRequest(String userId) {
         try {
-            long timeout = ThreadLocalRandom.current().nextLong(2000);
+            long timeout = ThreadLocalRandom.current().nextLong(TIMEOUT_SIMULATION);
             TimeUnit.MILLISECONDS.sleep(timeout);
         } catch (InterruptedException e) {
             System.out.println("Interrupted for " + userId);
             Thread.currentThread().interrupt();
         }
-        UserData cachedUserData = cache.get(userId);
-        if (cachedUserData != null) {
-            return cachedUserData;
-        }
-        // TODO: real user data fetching needs to be implemented
-        UserData userData = new UserData(userId, DETAILS_HEAD + userId);
-        cache.put(userId, userData);
-        return userData;
     }
 }
